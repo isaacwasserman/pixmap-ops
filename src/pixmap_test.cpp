@@ -34,7 +34,7 @@ int main(int argc, char** argv)
    copy.save("feep-test-assignment.png"); // should match original and load into gimp
 
    // should print r,g,b
-   Pixel pixel = image.get(1, 1);
+   Pixel pixel = image.get(0, 3);
    cout << (int) pixel.r << " " << (int) pixel.g << " " << (int) pixel.b << endl;
 
    // test: setting a color
@@ -68,11 +68,11 @@ int main(int argc, char** argv)
    sub.save("earth-subimage.png"); 
 
    // gamma correction
-   Image gamma = image.gammaCorrect(0.6f); 
-   gamma.save("earth-gamma-0.6.png"); 
-
-   gamma = image.gammaCorrect(2.2f);
+   Image gamma = image.gammaCorrect(2.2f); 
    gamma.save("earth-gamma-2.2.png"); 
+
+   gamma = image.gammaCorrect(0.6f);
+   gamma.save("earth-gamma-0.6.png");
 
    // alpha blend
    Image soup;
@@ -85,5 +85,11 @@ int main(int argc, char** argv)
    Image blend = background.alphaBlend(soup, 0.5f);
    image.replace(blend, x, y);
    image.save("earth-blend-0.5.png");
+
+   Image invert_test = image.invert();
+   invert_test.save("invert_test.png");
+
+   Image jitter_test = image.colorJitter(50);
+   jitter_test.save("jitter_test.png");
 }
 
