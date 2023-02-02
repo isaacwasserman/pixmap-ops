@@ -1,5 +1,12 @@
 // Copyright 2021, Aline Normoyle, alinen
 
+/**
+* This file contains the class and class method declarations for Image and Pixel.
+*
+* @author: Isaac Wasserman
+* @version: February 2, 2023
+*/
+
 #ifndef AGL_IMAGE_H_
 #define AGL_IMAGE_H_
 
@@ -19,10 +26,10 @@ class Pixel {
   Pixel operator=(const Pixel& other);
   bool operator==(const Pixel& other);
   Pixel operator*(const Pixel& other);
-  Pixel operator*(const int& operand);
-  Pixel operator*(const float& operand);
+  Pixel operator*(const float& operand) const;
   Pixel operator/(const float& operand);
   Pixel operator+(const Pixel& other);
+  int *toArray();
 
   unsigned char r;
   unsigned char g;
@@ -55,7 +62,7 @@ class Image {
    * @param filename The file to load, relative to the running directory
    * @param flip Whether the file should flipped vertally before being saved
    */
-  bool save(const std::string& filename, bool flip = true) const;
+  bool save(const std::string& filename, bool flip =  false) const;
 
   /** @brief Return the image width in pixels
    */
@@ -201,6 +208,18 @@ class Image {
 
   // Fill this image with a color
   void fill(const Pixel& c);
+
+  // Displace the individual color channels of the image
+  Image channelShift(int rShift[2], int gShift[2], int bShift[2]) const;
+
+  // Emulate a halftone print with channel shifted dots
+  Image halftone(int rShift[2], int gShift[2], int bShift[2]) const;
+
+  // Replace all pixels with the given color within the given tolerance
+  Image colorReplace(const Pixel& oldColor, const Pixel& newColor, int tolerance) const;
+
+  // Apply sobel filtering to the image
+  Image sobel() const;
 
  private:
   // todo

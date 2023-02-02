@@ -1,5 +1,12 @@
 // Copyright 2021, Aline Normoyle, alinen
 
+/**
+* This file contains the method definitions for Image and Pixel classes.
+*
+* @author: Isaac Wasserman
+* @version: February 2, 2023
+*/
+
 #include "image.h"
 
 #include <cassert>
@@ -14,18 +21,32 @@
 
 namespace agl {
 
+/**
+* @brief Instantiate a new Pixel object with all channels set to 0
+*/
 Pixel::Pixel(){
   this->r = 0;
   this->g = 0;
   this->b = 0;
 }
 
+/**
+* @brief Instantiate a new Pixel object
+* @param r Red channel value [0, 255]
+* @param g Green channel value [0, 255]
+* @param b Blue channel value [0, 255]
+*/
 Pixel::Pixel(unsigned char r, unsigned char g, unsigned char b){
   this->r = r;
   this->g = g;
   this->b = b;
 }
 
+/**
+* @brief Copy the values of another Pixel object into this one
+* @param other The Pixel object to copy
+* @return A reference to this Pixel object
+*/
 Pixel Pixel::operator=(const Pixel& other){
   this->r = other.r;
   this->g = other.g;
@@ -33,37 +54,72 @@ Pixel Pixel::operator=(const Pixel& other){
   return *this;
 }
 
+/**
+ * @brief Compare two Pixel objects for equality
+ * @param other The Pixel object to compare to
+ * @return True if the two Pixel objects have the same values for all channels
+ */
 bool Pixel::operator==(const Pixel& other){
   return this->r == other.r && this->g == other.g && this->b == other.b;
 }
 
+/**
+ * @brief Multiply two Pixel objects together using dot product
+ * @param other The Pixel object to multiply by
+ * @return A new Pixel object with the values of the two multiplied together (r1 * r2, g1 * g2, b1 * b2)
+ */
 Pixel Pixel::operator*(const Pixel& other){
   return Pixel(this->r * other.r, this->g * other.g, this->b * other.b);
 }
 
-Pixel Pixel::operator*(const int& operand){
-  return Pixel(this->r * operand, this->g * operand, this->b * operand);
-}
-
-Pixel Pixel::operator*(const float& operand){
+/**
+ * @brief Multiply a Pixel object by a scalar value
+ * @param operand scalar value to multiply by
+ * @return Pixel object with each channel multiplied by the scalar value
+ */
+Pixel Pixel::operator*(const float& operand) const{
   return Pixel(std::round(this->r * operand), std::round(this->g * operand), std::round(this->b * operand));
 }
 
+/**
+ * @brief Divide a Pixel object by a scalar value
+ * @param operand scalar value to divide by
+ * @return Pixel object with each channel divided by the scalar value
+ */
 Pixel Pixel::operator/(const float& operand){
   return Pixel(std::round(this->r / operand), std::round(this->g / operand), std::round(this->b / operand));
 }
 
+/**
+ * @brief Add two Pixel objects together
+ * @param other The Pixel object to add
+ * @return A new Pixel object with the values of the two added together (r1 + r2, g1 + g2, b1 + b2)
+ */
 Pixel Pixel::operator+(const Pixel& other){
   return Pixel(std::min(255, this->r + other.r), std::min(255, this->g + other.g), std::min(255, this->b + other.b));
 }
 
+/**
+ * @brief Stream a Pixel object to an output stream
+ * @param stream The output stream to write to
+ * @param p The Pixel object to write
+ * @return stream
+ */
 std::ostream& operator<<(std::ostream& stream, const Pixel& p) {
   stream << "(" << (int) p.r << ", " << (int) p.g << ", " << (int) p.b << ")";
   return stream;
 }
 
+/**
+ * @brief Construct an empty Image object
+ */
 Image::Image() {}
 
+/**
+ * @brief Construct a new Image object
+ * @param width The width of the image in pixels
+ * @param height The height of the image in pixels
+ */
 Image::Image(int width, int height) {
   mWidth = width;
   mHeight = height;
@@ -71,6 +127,10 @@ Image::Image(int width, int height) {
   mData = new unsigned char[width * height * mChannels];
 }
 
+/**
+ * @brief Construct a new Image object by copying another Image object
+ * @param orig The Image object to copy
+ */
 Image::Image(const Image& orig) {
   mWidth = orig.mWidth;
   mHeight = orig.mHeight;
@@ -79,6 +139,11 @@ Image::Image(const Image& orig) {
   memcpy(mData, orig.data(), mWidth * mHeight * mChannels);
 }
 
+/**
+ * @brief Copy the values of another Image object into this one
+ * @param orig The Image object to copy
+ * @return A reference to this Image object
+ */
 Image& Image::operator=(const Image& orig) {
   if (this != &orig) {
     mWidth = orig.mWidth;
@@ -90,22 +155,54 @@ Image& Image::operator=(const Image& orig) {
   return *this;
 }
 
+/**
+ * @brief Destruct the Image object
+ */
 Image::~Image() {
   if (mData != NULL) {
     delete[] mData;
   }
 }
 
+/**
+ * @brief Get the width of the image in pixels
+ * @return The width of the image in pixels
+ */
 int Image::width() const { return mWidth; }
 
+/**
+ * @brief Get the height of the image in pixels
+ * @return The height of the image in pixels
+ */
 int Image::height() const { return mHeight; }
 
+/**
+ * @brief Get the image data as an array of unsigned chars
+ * @return The image data as an array of unsigned chars
+ */
 unsigned char* Image::data() const { return mData; }
 
-void Image::set(int width, int height, unsigned char* data) {}
+/**
+ * @brief Replace the image data with new data
+ * @param width 
+ * @param height 
+ * @param data 
+ */
+void Image::set(int width, int height, unsigned char* data) {
+  mWidth = width;
+  mHeight = height;
+  mData = data;
+}
 
+/**
+ * @brief Load an image from a file
+ * @param filename Path to source file
+ * @param flip Whether to flip the image vertically
+ * @return true if the image was loaded successfully, false otherwise
+ */
 bool Image::load(const std::string& filename, bool flip) {
   int width, height, channels;
+  stbi_set_flip_vertically_on_load(flip);
   mData = stbi_load(filename.c_str(), &width, &height, &channels, 3);
   mWidth = width;
   mHeight = height;
@@ -117,8 +214,15 @@ bool Image::load(const std::string& filename, bool flip) {
   }
 }
 
+/**
+ * @brief Save the image to a file
+ * @param filename Path to destination file
+ * @param flip Whether to flip the image vertically
+ * @return true if the image was saved successfully, false otherwise
+ */
 bool Image::save(const std::string& filename, bool flip) const {
   std::string ext = filename.substr(filename.find_last_of(".") + 1);
+  stbi_flip_vertically_on_write(flip);
   for (int i = 0; i < ext.length(); i++) {
     ext[i] = std::tolower(ext[i]);
   }
@@ -143,11 +247,26 @@ bool Image::save(const std::string& filename, bool flip) const {
   }
 }
 
+/**
+ * @brief Get a pixel at a given row and column
+ * @param row The row of the pixel
+ * @param col The column of the pixel
+ * @return The pixel at the given row and column
+ */
 Pixel Image::get(int row, int col) const {
   int i = (row * mWidth + col) * 3;
+  if(i < 0 || i >= mWidth * mHeight * 3){
+    return Pixel{0, 0, 0};
+  }
   return Pixel{mData[i], mData[i + 1], mData[i + 2]};
 }
 
+/**
+ * @brief Get a pixel at a given position represented by a percent from the top left corner
+ * @param yPercent The percent from the top of the image [0, 1]
+ * @param xPercent The percent from the left of the image [0, 1]
+ * @param method The method to use for sampling ("nearest" or "bilinear")
+ */
 Pixel Image::get_rel(float yPercent, float xPercent, std::string method) const {
   if(method == "nearest"){
     int row = (int) std::lround(yPercent * mHeight);
@@ -195,6 +314,12 @@ Pixel Image::get_rel(float yPercent, float xPercent, std::string method) const {
   }
 }
 
+/**
+ * @brief Set a pixel at a given row and column
+ * @param row The row of the pixel
+ * @param col The column of the pixel
+ * @param color The color to set the pixel to
+ */
 void Image::set(int row, int col, const Pixel& color) {
   int i = (row * mWidth + col) * 3;
   mData[i] = color.r;
@@ -202,10 +327,30 @@ void Image::set(int row, int col, const Pixel& color) {
   mData[i + 2] = color.b;
 }
 
-Pixel Image::get(int i) const { return Pixel{0, 0, 0}; }
+/**
+ * @brief Get the ith pixel from the top left corner of the image
+ * @param i 
+ * @return Pixel 
+ */
+Pixel Image::get(int i) const {
+  return get(i / mWidth, i % mWidth);
+}
 
-void Image::set(int i, const Pixel& c) {}
+/**
+ * @brief Set the ith pixel from the top left corner of the image
+ * @param i 
+ * @param c 
+ */
+void Image::set(int i, const Pixel& c) {
+  set(i / mWidth, i % mWidth, c);
+}
 
+/**
+ * @brief Resize the image to the given width and height using bilinear interpolation
+ * @param w 
+ * @param h 
+ * @return Image 
+ */
 Image Image::resize(int w, int h) const {
   Image result(w, h);
   for(int row = 0; row < h; row++){
@@ -217,6 +362,10 @@ Image Image::resize(int w, int h) const {
   return result;
 }
 
+/**
+ * @brief Flip the image horizontally
+ * @return Image 
+ */
 Image Image::flipHorizontal() const {
   Image result(mWidth, mHeight);
   for(int row = 0; row < mHeight; row++){
@@ -227,6 +376,10 @@ Image Image::flipHorizontal() const {
   return result;
 }
 
+/**
+ * @brief Flip the image vertically
+ * @return Image 
+ */
 Image Image::flipVertical() const {
   Image result(mWidth, mHeight);
   for(int col = 0; col < mWidth; col++){
@@ -237,6 +390,11 @@ Image Image::flipVertical() const {
   return result;
 }
 
+// Part 2: Operator 1
+/**
+ * @brief Rotate the image 90 degrees clockwise
+ * @return Image 
+ */
 Image Image::rotate90() const {
   Image result(mHeight, mWidth);
   for(int row = 0; row < mHeight; row++){
@@ -247,6 +405,14 @@ Image Image::rotate90() const {
   return result;
 }
 
+/**
+ * @brief Extract a subimage from the image starting at the given position and with the given width and height
+ * @param startx 
+ * @param starty 
+ * @param w 
+ * @param h 
+ * @return Image 
+ */
 Image Image::subimage(int startx, int starty, int w, int h) const {
   Image sub(w, h);
   for(int row = starty; row < starty + h; row++){
@@ -257,6 +423,12 @@ Image Image::subimage(int startx, int starty, int w, int h) const {
   return sub;
 }
 
+/**
+ * @brief Replace a subimage of the image with the given image starting at the given position
+ * @param image The replacement image
+ * @param startx 
+ * @param starty 
+ */
 void Image::replace(const Image& image, int startx, int starty) {
   for(int row = starty; row < starty + image.mHeight; row++){
     for(int col = startx; col < startx + image.mWidth; col++){
@@ -306,6 +478,11 @@ Image Image::darkest(const Image& other) const {
   return result;
 }
 
+/**
+ * @brief Correct the gamma of the image using the given gamma value
+ * @param gamma 
+ * @return Corrected image 
+ */
 Image Image::gammaCorrect(float gamma) const {
   Image result(mWidth, mHeight);
   for(int row = 0; row < mHeight; row++){
@@ -326,6 +503,12 @@ Image Image::gammaCorrect(float gamma) const {
   return result;
 }
 
+/**
+ * @brief Blend the image with the given image using the given alpha value
+ * @param other The other image
+ * @param alpha
+ * @return Blended image 
+ */
 Image Image::alphaBlend(const Image& other, float alpha) const {
   Image result(mWidth, mHeight);
   for(int row = 0; row < mHeight; row++){
@@ -339,6 +522,11 @@ Image Image::alphaBlend(const Image& other, float alpha) const {
   return result;
 }
 
+// Part 2: Operator 2
+/**
+ * @brief Invert the colors of the image
+ * @return Inverted image 
+ */
 Image Image::invert() const {
   Image result(mWidth, mHeight);
   for(int row = 0; row < mHeight; row++){
@@ -353,6 +541,10 @@ Image Image::invert() const {
   return result;
 }
 
+/**
+ * @brief Convert the image to grayscale using a weighted average of channels
+ * @return Grayscale image 
+ */
 Image Image::grayscale() const {
   Image result(mWidth, mHeight);
   for(int row = 0; row < mHeight; row++){
@@ -368,6 +560,12 @@ Image Image::grayscale() const {
   return result;
 }
 
+// Part 2: Operator 3
+/**
+ * @brief Color jitter the image by the given amount
+ * @param size Degree of jitter
+ * @return Jittered image 
+ */
 Image Image::colorJitter(int size) const {
   Image image(mWidth, mHeight);
   srand(time(NULL));
@@ -377,6 +575,91 @@ Image Image::colorJitter(int size) const {
     for(int col = 0; col < mWidth; col++){
       Pixel p = get(row, col);
       p = p + delta;
+      image.set(row, col, p);
+    }
+  }
+  return image;
+}
+
+// Part 2: Operator 4
+/**
+ * @brief Shift the channels of the image by the given amount
+ * @param rShift Amount to shift the red channel
+ * @param gShift Amount to shift the green channel
+ * @param bShift Amount to shift the blue channel
+ * @return Shifted image 
+ */
+Image Image::channelShift(int rShift[2], int gShift[2], int bShift[2]) const {
+  Image result(mWidth, mHeight);
+  for(int col = 0; col < mWidth; col++){
+    for(int row = 0; row < mHeight; row++){
+      Pixel rSource = get(row + rShift[1], col + rShift[0]);
+      Pixel gSource = get(row + gShift[1], col + gShift[0]);
+      Pixel bSource = get(row + bShift[1], col + bShift[0]);
+      Pixel p = Pixel(rSource.r, gSource.g, bSource.b);
+      result.set(row, col, p);
+    }
+  }
+  return result;
+}
+
+// Part 2: Operator 5
+/**
+ * @brief Emulate a halftone print using the given shift values
+ * @param rShift Amount to shift the red channel
+ * @param gShift Amount to shift the green channel
+ * @param bShift Amount to shift the blue channel
+ * @return Halftoned image 
+ */
+Image Image::halftone(int rShift[2], int gShift[2], int bShift[2]) const {
+  int scale_factor = 2;
+  int enlarge_factor = 4;
+  Image downsampled = resize(mWidth / scale_factor, mHeight / scale_factor);
+  Image dots(mWidth * enlarge_factor, mHeight * enlarge_factor);
+  for(int col = 0; col < dots.width(); col++){
+    for(int row = 0; row < dots.height(); row++){
+      Pixel p = Pixel(0, 0, 0);
+      dots.set(row, col, p);
+    }
+  }
+  for(int col = 0; col < downsampled.width(); col++){
+    for(int row = 0; row < downsampled.height(); row++){
+      Pixel p = downsampled.get(row, col);
+      int r = (scale_factor * enlarge_factor) / 2;
+      for(int x = 0; x < scale_factor * enlarge_factor; x++){
+        for(int y = 0; y < scale_factor * enlarge_factor; y++){
+          if((x - r) * (x - r) + (y - r) * (y - r) <= r * r){
+            dots.set(row * scale_factor * enlarge_factor + y, col * scale_factor * enlarge_factor + x, p);
+          }
+        }
+      }
+    }
+  }
+  return dots.channelShift(rShift, gShift, bShift);
+}
+
+// Part 2: Operator 6
+/**
+ * @brief Replace pixels of oldColor with newColor within the given tolerance
+ * @param oldColor Color to replace
+ * @param newColor Color to replace with
+ * @param tolerance Tolerance for color replacement
+ * @return Color replaced image 
+ */
+Image Image::colorReplace(const Pixel& oldColor, const Pixel& newColor, int tolerance) const {
+  Image image(mWidth, mHeight);
+  int r_diff, g_diff, b_diff, diff;
+  float alpha = 1;
+  for(int row = 0; row < mHeight; row++){
+    for(int col = 0; col < mWidth; col++){
+      Pixel p = get(row, col);
+      r_diff = abs(p.r - oldColor.r);
+      g_diff = abs(p.g - oldColor.g);
+      b_diff = abs(p.b - oldColor.b);
+      diff = sqrt(r_diff * r_diff + g_diff * g_diff + b_diff * b_diff);
+      if(diff <= tolerance){
+        p = (newColor * alpha) + (p * (1 - alpha));
+      }
       image.set(row, col, p);
     }
   }

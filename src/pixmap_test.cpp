@@ -1,5 +1,12 @@
 // Copyright 2021, Aline Normoyle, alinen
 
+/**
+* This file contains tests for the Image class.
+*
+* @author: Isaac Wasserman
+* @version: February 2, 2023
+*/
+
 #include <iostream>
 #include "image.h"
 using namespace std;
@@ -91,5 +98,17 @@ int main(int argc, char** argv)
 
    Image jitter_test = image.colorJitter(50);
    jitter_test.save("jitter_test.png");
+
+   int rShift[2] = {0,0};
+   int gShift[2] = {2,2};
+   int bShift[2] = {-2,-2};
+   Image channelShift_test = image.channelShift(rShift,gShift,bShift);
+   channelShift_test.save("channelShift_test.png");
+
+   Image halftone_test = image.halftone(rShift,gShift,bShift);
+   halftone_test.save("halftone_test.png");
+
+   Image colorReplace_test = image.colorReplace(Pixel{0,0,0}, Pixel{255,0,0}, 100);
+   colorReplace_test.save("colorReplace_test.png");
 }
 
