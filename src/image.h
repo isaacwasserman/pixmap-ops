@@ -218,6 +218,8 @@ class Image {
   // Replace all pixels with the given color within the given tolerance
   Image colorReplace(const Pixel& oldColor, const Pixel& newColor, int tolerance) const;
 
+  void convolve(float *kernel, int kSize, float* out) const;
+
   // Apply sobel filtering to the image
   Image sobel() const;
 

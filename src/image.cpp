@@ -666,6 +666,86 @@ Image Image::colorReplace(const Pixel& oldColor, const Pixel& newColor, int tole
   return image;
 }
 
+void Image::convolve(float *kernel, int kSize, float *out) const {
+  memset(out, 0, mWidth * mHeight * 3 * sizeof(float));
+  int padding = (kSize - 1) / 2;
+  int outWidth = (mWidth - kSize + (2 * padding)) + 1;
+  int outHeight = (mHeight - kSize + (2 * padding)) + 1;
+  int outRow = 0;
+  int outCol = 0;
+  for(int imageRow = 0 - padding; imageRow < mHeight + padding - 1; imageRow++){
+    for(int imageCol = 0 - padding; imageCol < mWidth + padding - 1; imageCol++){
+      float rSum = 0;
+      float gSum = 0;
+      float bSum = 0;
+      for(int kernelRow = 0; kernelRow < kSize; kernelRow++){
+        for(int kernelCol = 0; kernelCol < kSize; kernelCol++){
+          rSum += get(imageRow + kernelRow, imageCol + kernelCol).r * kernel[kernelRow * kSize + kernelCol];
+          gSum += get(imageRow + kernelRow, imageCol + kernelCol).g * kernel[kernelRow * kSize + kernelCol];
+          bSum += get(imageRow + kernelRow, imageCol + kernelCol).b * kernel[kernelRow * kSize + kernelCol];
+        }
+      }
+      
+      out[(outRow * outWidth + outCol) * 3] = rSum;
+      out[(outRow * outWidth + outCol) * 3 + 1] = gSum;
+      out[(outRow * outWidth + outCol) * 3 + 2] = bSum;
+      outCol++;
+    }
+    outCol = 0;
+    outRow++;
+  }
+}
+
+Image Image::sobel() const {
+  float kernel[9] = {
+    -1,0,1,
+    -2,0,2,
+    -1,0,1
+  };
+
+  float *out = (float *) malloc(sizeof(float) * width() * height() * 3 + 1);
+
+  convolve(kernel, 3, out);
+
+  // get maximum value of out
+  float max = 0;
+  float min = -1;
+  float average = 0;
+  for (int i = 0; i < width()*height()*3; i++) {
+    if (out[i] > max) {
+        max = out[i];
+    }
+    if (out[i] < min || min == -1) {
+        min = out[i];
+    }
+    average += (out[i] / (width()*height()*3));
+  }
+
+  unsigned char outChar[width()*height()*3];
+   // divide each value by max
+   for (int i = 0; i < width()*height()*3; i++) {
+      outChar[i] = 255*((out[i] - min)/max);
+      if(outChar[i] > 255){
+         outChar[i] = 255;
+      }
+      if(outChar[i] < 0){
+         outChar[i] = 0;
+      }
+   }
+
+   Image convolved = Image(width(), height());
+   for(int row = 0; row < convolved.height(); row++){
+      for(int col = 0; col < convolved.width(); col++){
+         Pixel p = Pixel(outChar[row*width()*3 + col*3], outChar[row*width()*3 + col*3 + 1], outChar[row*width()*3 + col*3 + 2]);
+         convolved.set(row, col, p);
+      }
+   }
+
+  free(out);
+
+  return convolved;
+}
+
 Image Image::bitmap(int size) const {
   Image image(0, 0);
 

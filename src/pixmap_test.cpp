@@ -82,33 +82,11 @@ int main(int argc, char** argv)
    gamma.save("earth-gamma-0.6.png");
 
    // alpha blend
-   Image soup;
-   soup.load("../images/soup.png");
+   Image earth;
+   earth.load("../images/earth.png");
 
-   int y = (int) (0.5f * (image.width() - soup.width()));
-   int x = (int) (0.5f * (image.height() - soup.height()));
-   Image background = image.subimage(x, y, soup.width(), soup.height());
-   background.save("background-test.png");
-   Image blend = background.alphaBlend(soup, 0.5f);
-   image.replace(blend, x, y);
-   image.save("earth-blend-0.5.png");
-
-   Image invert_test = image.invert();
-   invert_test.save("invert_test.png");
-
-   Image jitter_test = image.colorJitter(50);
-   jitter_test.save("jitter_test.png");
-
-   int rShift[2] = {0,0};
-   int gShift[2] = {2,2};
-   int bShift[2] = {-2,-2};
-   Image channelShift_test = image.channelShift(rShift,gShift,bShift);
-   channelShift_test.save("channelShift_test.png");
-
-   Image halftone_test = image.halftone(rShift,gShift,bShift);
-   halftone_test.save("halftone_test.png");
-
-   Image colorReplace_test = image.colorReplace(Pixel{0,0,0}, Pixel{255,0,0}, 100);
-   colorReplace_test.save("colorReplace_test.png");
+   Image sobeled = earth.resize(1024, 1024).sobel().grayscale();
+   sobeled.save("sobeled.png");
+   
 }
 
