@@ -673,8 +673,8 @@ void Image::convolve(float *kernel, int kSize, float *out) const {
   int outHeight = (mHeight - kSize + (2 * padding)) + 1;
   int outRow = 0;
   int outCol = 0;
-  for(int imageRow = 0 - padding; imageRow < mHeight + padding - 1; imageRow++){
-    for(int imageCol = 0 - padding; imageCol < mWidth + padding - 1; imageCol++){
+  for(int imageRow = 0 - padding; imageRow < 0 - padding + mHeight; imageRow++){
+    for(int imageCol = 0 - padding; imageCol < 0 - padding + mWidth; imageCol++){
       float rSum = 0;
       float gSum = 0;
       float bSum = 0;
@@ -685,15 +685,51 @@ void Image::convolve(float *kernel, int kSize, float *out) const {
           bSum += get(imageRow + kernelRow, imageCol + kernelCol).b * kernel[kernelRow * kSize + kernelCol];
         }
       }
-      
-      out[(outRow * outWidth + outCol) * 3] = rSum;
-      out[(outRow * outWidth + outCol) * 3 + 1] = gSum;
-      out[(outRow * outWidth + outCol) * 3 + 2] = bSum;
+      out[(outRow * outWidth * 3) + (outCol * 3) + 0] = rSum;
+      out[(outRow * outWidth * 3) + (outCol * 3) + 1] = gSum;
+      out[(outRow * outWidth * 3) + (outCol * 3) + 2] = bSum;
       outCol++;
     }
     outCol = 0;
     outRow++;
   }
+}
+
+Image arrToImage(float *arr, int width, int height) {
+  // get maximum value of out
+  float max = 0;
+  float min = -1;
+  float average = 0;
+  for (int i = 0; i < width*height*3; i++) {
+    if (arr[i] > max) {
+        max = arr[i];
+    }
+    if (arr[i] < min || min == -1) {
+        min = arr[i];
+    }
+    average += (arr[i] / (width*height*3));
+  }
+
+  unsigned char outChar[width*height*3];
+   // divide each value by max
+   for (int i = 0; i < width*height*3; i++) {
+      outChar[i] = 255*((arr[i])/max);
+      if(outChar[i] > 255){
+         outChar[i] = 255;
+      }
+      if(outChar[i] < 0){
+         outChar[i] = 0;
+      }
+   }
+
+   Image newImage = Image(width, height);
+   for(int row = 0; row < newImage.height(); row++){
+      for(int col = 0; col < newImage.width(); col++){
+         Pixel p = Pixel(outChar[row*width*3 + col*3], outChar[row*width*3 + col*3 + 1], outChar[row*width*3 + col*3 + 2]);
+         newImage.set(row, col, p);
+      }
+   }
+   return newImage;
 }
 
 Image Image::sobel() const {
@@ -703,47 +739,14 @@ Image Image::sobel() const {
     -1,0,1
   };
 
-  float *out = (float *) malloc(sizeof(float) * width() * height() * 3 + 1);
+  float *out = new float[mWidth * mHeight * 3];
 
   convolve(kernel, 3, out);
 
-  // get maximum value of out
-  float max = 0;
-  float min = -1;
-  float average = 0;
-  for (int i = 0; i < width()*height()*3; i++) {
-    if (out[i] > max) {
-        max = out[i];
-    }
-    if (out[i] < min || min == -1) {
-        min = out[i];
-    }
-    average += (out[i] / (width()*height()*3));
-  }
+  Image result = arrToImage(out, mWidth, mHeight);
 
-  unsigned char outChar[width()*height()*3];
-   // divide each value by max
-   for (int i = 0; i < width()*height()*3; i++) {
-      outChar[i] = 255*((out[i] - min)/max);
-      if(outChar[i] > 255){
-         outChar[i] = 255;
-      }
-      if(outChar[i] < 0){
-         outChar[i] = 0;
-      }
-   }
-
-   Image convolved = Image(width(), height());
-   for(int row = 0; row < convolved.height(); row++){
-      for(int col = 0; col < convolved.width(); col++){
-         Pixel p = Pixel(outChar[row*width()*3 + col*3], outChar[row*width()*3 + col*3 + 1], outChar[row*width()*3 + col*3 + 2]);
-         convolved.set(row, col, p);
-      }
-   }
-
-  free(out);
-
-  return convolved;
+  delete[] out;
+  return result;
 }
 
 Image Image::bitmap(int size) const {
