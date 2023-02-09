@@ -124,6 +124,9 @@ Image::Image(int width, int height) {
   mWidth = width;
   mHeight = height;
   mChannels = 3;
+  if(mData != NULL){
+    delete[] mData;
+  }
   mData = new unsigned char[width * height * mChannels];
 }
 
@@ -135,6 +138,9 @@ Image::Image(const Image& orig) {
   mWidth = orig.mWidth;
   mHeight = orig.mHeight;
   mChannels = orig.mChannels;
+  if(mData != NULL){
+    delete[] mData;
+  }
   mData = new unsigned char[mWidth * mHeight * mChannels];
   memcpy(mData, orig.data(), mWidth * mHeight * mChannels);
 }
@@ -149,6 +155,9 @@ Image& Image::operator=(const Image& orig) {
     mWidth = orig.mWidth;
     mHeight = orig.mHeight;
     mChannels = orig.mChannels;
+    if(mData != NULL){
+      delete[] mData;
+    }
     mData = new unsigned char[mWidth * mHeight * mChannels];
     memcpy(mData, orig.data(), mWidth * mHeight * mChannels);
   }
@@ -191,7 +200,9 @@ unsigned char* Image::data() const { return mData; }
 void Image::set(int width, int height, unsigned char* data) {
   mWidth = width;
   mHeight = height;
-  delete[] mData;
+  if(mData != NULL){
+    delete[] mData;
+  }
   mData = data;
 }
 
@@ -204,6 +215,9 @@ void Image::set(int width, int height, unsigned char* data) {
 bool Image::load(const std::string& filename, bool flip) {
   int width, height, channels;
   stbi_set_flip_vertically_on_load(flip);
+  if(mData != NULL){
+    delete[] mData;
+  }
   mData = stbi_load(filename.c_str(), &width, &height, &channels, 3);
   mWidth = width;
   mHeight = height;

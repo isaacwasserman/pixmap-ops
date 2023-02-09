@@ -225,7 +225,7 @@ class Image {
 
  private:
   // todo
-  unsigned char* mData;
+  unsigned char* mData = NULL;
   int mWidth;
   int mHeight;
   int mChannels;
