@@ -191,6 +191,7 @@ unsigned char* Image::data() const { return mData; }
 void Image::set(int width, int height, unsigned char* data) {
   mWidth = width;
   mHeight = height;
+  delete[] mData;
   mData = data;
 }
 
@@ -670,7 +671,7 @@ void Image::convolve(float *kernel, int kSize, float *out) const {
   memset(out, 0, mWidth * mHeight * 3 * sizeof(float));
   int padding = (kSize - 1) / 2;
   int outWidth = (mWidth - kSize + (2 * padding)) + 1;
-  int outHeight = (mHeight - kSize + (2 * padding)) + 1;
+  // int outHeight = (mHeight - kSize + (2 * padding)) + 1;
   int outRow = 0;
   int outCol = 0;
   for(int imageRow = 0 - padding; imageRow < 0 - padding + mHeight; imageRow++){
