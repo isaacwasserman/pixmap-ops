@@ -458,8 +458,15 @@ Image Image::swirl() const {
 }
 
 Image Image::add(const Image& other) const {
-  Image result(0, 0);
-
+  Image result(width(), height());
+  for(int row = 0; row < height(); row++){
+    for(int col = 0; col < width(); col++){
+      Pixel p1 = get(row, col);
+      Pixel p2 = other.get(row, col);
+      Pixel p3 = p1 + p2;
+      result.set(row, col, p3);
+    }
+  }
   return result;
 }
 
@@ -681,6 +688,11 @@ Image Image::colorReplace(const Pixel& oldColor, const Pixel& newColor, int tole
   return image;
 }
 
+/**
+ * @brief Performs convolution on the image with the given kernel and places the result in "out"
+ * @param kernel 1D array describing the square convolution kernel
+ * @param kSize width of kernel
+ */
 void Image::convolve(float *kernel, int kSize, float *out) const {
   memset(out, 0, mWidth * mHeight * 3 * sizeof(float));
   int padding = (kSize - 1) / 2;
@@ -710,11 +722,17 @@ void Image::convolve(float *kernel, int kSize, float *out) const {
   }
 }
 
+/**
+ * @brief Convert a 1D array of floats by scaling each value to be between 0 and 255
+ * @param arr 1D array of floats
+ * @param width width of image
+ * @param height height of image
+ * @return Image instance 
+ */
 Image arrToImage(float *arr, int width, int height) {
   // get maximum value of out
   float max = 0;
   float min = -1;
-  float average = 0;
   for (int i = 0; i < width*height*3; i++) {
     if (arr[i] > max) {
         max = arr[i];
@@ -722,7 +740,6 @@ Image arrToImage(float *arr, int width, int height) {
     if (arr[i] < min || min == -1) {
         min = arr[i];
     }
-    average += (arr[i] / (width*height*3));
   }
 
   unsigned char outChar[width*height*3];
@@ -747,19 +764,65 @@ Image arrToImage(float *arr, int width, int height) {
    return newImage;
 }
 
+// Part 2: Operator 7
+/**
+ * @brief Sobel edge detection (horizontal and vertical)
+ * @return Filtered image 
+ */
 Image Image::sobel() const {
-  float kernel[9] = {
+  float horizontal_kernel[9] = {
     -1,0,1,
     -2,0,2,
     -1,0,1
   };
 
+  float vertical_kernel[9] = {
+    -1,-2,-1,
+    0,0,0,
+    1,2,1
+  };
+
+  float *out_horizontal = new float[mWidth * mHeight * 3];
+  float *out_vertical = new float[mWidth * mHeight * 3];
+
+  convolve(horizontal_kernel, 3, out_horizontal);
+  convolve(vertical_kernel, 3, out_vertical);
+
+  Image horizontal_result = arrToImage(out_horizontal, mWidth, mHeight);
+  Image vertical_result = arrToImage(out_vertical, mWidth, mHeight);
+
+  Image result = horizontal_result.add(vertical_result);
+
+  delete[] out_horizontal;
+  delete[] out_vertical;
+  return result;
+}
+
+// Part 2: Operator 8
+/**
+ * @brief Blur the image with a Gaussian kernel
+ * @param sigma Standard deviation of Gaussian kernel
+ * @return Blurred image
+ */
+Image Image::gaussianBlur(float sigma) const {
+  int kSize = 2 * ceil(3 * sigma) + 1;
+  float *kernel = new float[kSize * kSize];
+  float sum = 0;
+  for(int row = 0; row < kSize; row++){
+    for(int col = 0; col < kSize; col++){
+      kernel[row * kSize + col] = exp(-((row - kSize/2) * (row - kSize/2) + (col - kSize/2) * (col - kSize/2)) / (2 * sigma * sigma));
+      sum += kernel[row * kSize + col];
+    }
+  }
+  for(int row = 0; row < kSize; row++){
+    for(int col = 0; col < kSize; col++){
+      kernel[row * kSize + col] /= sum;
+    }
+  }
   float *out = new float[mWidth * mHeight * 3];
-
-  convolve(kernel, 3, out);
-
+  convolve(kernel, kSize, out);
   Image result = arrToImage(out, mWidth, mHeight);
-
+  delete[] kernel;
   delete[] out;
   return result;
 }

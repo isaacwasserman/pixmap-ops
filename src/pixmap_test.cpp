@@ -85,9 +85,10 @@ int main(int argc, char** argv)
    Image earth;
    earth.load("../images/earth.png");
 
-   // Image resized = earth.resize(1024,1024);
    Image sobeled = earth.sobel();
    sobeled.save("sobeled.png");
    
+   Image blurredSobel = sobeled.gaussianBlur(6);
+   blurredSobel.save("blurredSobel.png");
 }
 

@@ -223,6 +223,9 @@ class Image {
   // Apply sobel filtering to the image
   Image sobel() const;
 
+  // Apply a gaussian blur to the image
+  Image gaussianBlur(float sigma) const;
+
  private:
   // todo
   unsigned char* mData = NULL;
