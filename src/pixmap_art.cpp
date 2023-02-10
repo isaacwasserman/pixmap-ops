@@ -61,7 +61,7 @@ int main(int argc, char** argv)
    Image halftoned;
    halftoned = earth.halftone(rShift, gShift, bShift);
    halftoned = halftoned.resize(400, 400);
-   halftoned.save("../art/halftone.png");
+   halftoned.save("../art/halftone2.png");
 
    Image lightest;
    galaxy.resize(earth.width(), earth.height());
