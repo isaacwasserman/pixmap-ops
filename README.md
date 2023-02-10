@@ -64,7 +64,7 @@ Operators Implemented:
 
 5. `Image::halftone(int rShift[2], int gShift[2], int bShift[2])`: Decomposes image into a grid of red, green, and blue dots.
 
-![](art/halftone.png)
+<img src="art/halftone.png" style="max-width:400px;"/>
 
 6. `Image::colorReplace(const Pixel& oldColor, const Pixel& newColor, int tolerance)`: Replaces all pixels of color `oldColor` with `newColor`. Increasing `tolerance` expands the range of colors considered matching `oldColor`.
 
