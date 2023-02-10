@@ -226,6 +226,12 @@ class Image {
   // Apply a gaussian blur to the image
   Image gaussianBlur(float sigma) const;
 
+  // Gives every black pixel the color of the nearest non-black pixel
+  Image expandOutlines(int iterations) const;
+
+  // Replace all pixels with the given hue within the given tolerance
+  Image hueReplace(const Pixel& hue, const Pixel& newColor, int tolerance) const;
+
  private:
   // todo
   unsigned char* mData = NULL;

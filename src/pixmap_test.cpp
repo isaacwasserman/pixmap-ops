@@ -90,5 +90,12 @@ int main(int argc, char** argv)
    
    Image blurredSobel = sobeled.gaussianBlur(6);
    blurredSobel.save("blurredSobel.png");
+
+   int rShift[2] = {-1,-1};
+   int gShift[2] = {0,0};
+   int bShift[2] = {1,1};
+
+   Image halftoned = blurredSobel.grayscale().halftone(rShift, gShift, bShift);
+   halftoned.save("halftoned.png");
 }
 

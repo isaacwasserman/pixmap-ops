@@ -457,6 +457,12 @@ Image Image::swirl() const {
   return result;
 }
 
+// Part 2: Operator 9
+/**
+ * @brief Add two images together, clipping at 255
+ * @param other Second image to be added
+ * @return Sum of the two images
+ */
 Image Image::add(const Image& other) const {
   Image result(width(), height());
   for(int row = 0; row < height(); row++){
@@ -489,14 +495,40 @@ Image Image::difference(const Image& other) const {
 }
 
 Image Image::lightest(const Image& other) const {
-  Image result(0, 0);
-
+  Image result(mWidth, mHeight);
+  for(int row = 0; row < mHeight; row++){
+    for(int col = 0; col < mWidth; col++){
+      Pixel p1 = get(row, col);
+      Pixel p2 = other.get(row, col);
+      float v1 = sqrt((int)p1.r * p1.r + (int)p1.g * p1.g + (int)p1.b * p1.b);
+      float v2 = sqrt((int)p2.r * p2.r + (int)p2.g * p2.g + (int)p2.b * p2.b);
+      if(v2 > v1){
+        result.set(row, col, p2);
+      }
+      else {
+        result.set(row, col, p1);
+      }
+    }
+  }
   return result;
 }
 
 Image Image::darkest(const Image& other) const {
-  Image result(0, 0);
-
+  Image result(mWidth, mHeight);
+  for(int row = 0; row < mHeight; row++){
+    for(int col = 0; col < mWidth; col++){
+      Pixel p1 = get(row, col);
+      Pixel p2 = other.get(row, col);
+      float v1 = sqrt((int)p1.r * p1.r + (int)p1.g * p1.g + (int)p1.b * p1.b);
+      float v2 = sqrt((int)p2.r * p2.r + (int)p2.g * p2.g + (int)p2.b * p2.b);
+      if(v2 < v1){
+        result.set(row, col, p2);
+      }
+      else {
+        result.set(row, col, p1);
+      }
+    }
+  }
   return result;
 }
 
@@ -688,6 +720,19 @@ Image Image::colorReplace(const Pixel& oldColor, const Pixel& newColor, int tole
   return image;
 }
 
+void *normalize(const Pixel& p, float *normalized){
+  int maxComponent = p.r;
+  if(p.g > maxComponent){
+    maxComponent = p.g;
+  }
+  if(p.b > maxComponent){
+    maxComponent = p.b;
+  }
+  normalized[0] = p.r / (float)maxComponent;
+  normalized[1] = p.g / (float)maxComponent;
+  normalized[2] = p.b / (float)maxComponent;
+}
+
 /**
  * @brief Performs convolution on the image with the given kernel and places the result in "out"
  * @param kernel 1D array describing the square convolution kernel
@@ -824,6 +869,40 @@ Image Image::gaussianBlur(float sigma) const {
   Image result = arrToImage(out, mWidth, mHeight);
   delete[] kernel;
   delete[] out;
+  return result;
+}
+
+Image Image::expandOutlines(int iterations) const {
+  Image result(*this);
+
+  for(int k = 0; k < iterations; k++){
+    int nColorPixels = 0;
+    int colorPixels[mWidth * mHeight][2];
+
+    for(int row = 0; row < mHeight; row++){
+      for(int col = 0; col < mWidth; col++){
+        if(result.get(row, col).r > 10 || result.get(row, col).g > 10 || result.get(row, col).b > 10){
+          colorPixels[nColorPixels][0] = col;
+          colorPixels[nColorPixels][1] = row;
+          nColorPixels++;
+        }
+      }
+    }
+
+    for(int i = 0; i < nColorPixels; i++){
+      int col = colorPixels[i][0];
+      int row = colorPixels[i][1];
+      for(int rowOffset = -1; rowOffset <= 1; rowOffset++){
+        for(int colOffset = -1; colOffset <= 1; colOffset++){
+          if(row + rowOffset >= 0 && row + rowOffset < mHeight && col + colOffset >= 0 && col + colOffset < mWidth){
+            if(result.get(row + rowOffset, col + colOffset).r < 10 && result.get(row + rowOffset, col + colOffset).g < 10 && result.get(row + rowOffset, col + colOffset).b < 10){
+              result.set(row + rowOffset, col + colOffset, result.get(row, col));
+            }
+          }
+        }
+      }
+    }
+  }
   return result;
 }
 

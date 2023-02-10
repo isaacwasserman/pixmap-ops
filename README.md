@@ -45,9 +45,35 @@ pixmap-ops/build $ ../bin/pixmap_art
 
 ## Image operators
 
-TODO: Document the features of your PPM image class here. Include example images.
+Operators Implemented:
+1. `Image::rotate90()`: Rotates the image 90º clockwise.
+![](art/rotate90.png)
+2. `Image::invert()`: Inverts colors.
+![](art/invert.png)
+3. `Image::colorJitter(int size)`: Adds a random vector of the specified size to each pixel of the image.
+![](art/colorJitter.png)
+4. `Image::channelShift(int rShift[2], int gShift[2], int bShift[2])`: Adds a specified offset to each channel of the image.
+![](art/channelShift.png)
+5. `Image::halftone(int rShift[2], int gShift[2], int bShift[2])`: Decomposes image into a grid of red, green, and blue dots.
+![](art/halftone.png)
+6. `Image::colorReplace(const Pixel& oldColor, const Pixel& newColor, int tolerance)`: Replaces all pixels of color `oldColor` with `newColor`. Increasing `tolerance` expands the range of colors considered matching `oldColor`.
+![](art/colorReplace.png)
+7. `Image::sobel()`: Produces a full-color Sobel filtered version of the image using horizontal and vertical kernels.
+![](art/sobel.png)
+8. `Image::gaussianBlur(float sigma)`: Applies a Gaussian blur to the image using a Gaussian kernel with standard deviation `sigma`.
+![](art/gaussianBlur.png)
+9. `Image::lightest(const Image& other)`: For each pixel, uses the image with the lightest color.
+![](art/lightest.png)
+
 
 ## Results
 
-TODO: Show artworks using your class
+![](art/spongebob.png)
+Uses `channelShift()`, `halftone()`, `colorReplace()`, and `lightest()`
 
+
+![](art/beach.png)
+Uses `sobel()`, `invert()`, and `colorReplace()`
+
+![](art/haverford.png)
+Uses `colorReplace()` and `lightest()`
