@@ -2,7 +2,7 @@
 
 Image manipulation demos based on the PPM image format.
 
-TODO: Add a representative image for your project here
+![](art/spongebob.png)
 
 ## How to build
 
